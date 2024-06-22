@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package go_food_order.services.user.internal;
+
+option go_package = "github.com/krissukoco/go-food-order-miroservices/api/proto/user_service";
+
+service UserServiceInternal {
+  rpc GetPosUserByEmail(EmailReq) returns (User) {}
+  rpc GetBackofficeUserByEmail(EmailReq) returns (User) {}
+  rpc CreateCustomer(CreateCustomerReq) returns (Id) {}
+}
+
+message EmailReq {
+  string email = 1;
+}
+
+message Id {
+  uint64 id = 1;
+}
+
+message User {
+  uint64 id = 1;
+  string name = 2;
+  string email = 3;
+  string password = 4;
+}
+
+message CreateCustomerReq {
+  
+}
