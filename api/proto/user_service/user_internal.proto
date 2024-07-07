@@ -2,12 +2,15 @@ syntax = "proto3";
 
 package go_food_order.services.user.internal;
 
-option go_package = "github.com/krissukoco/go-food-order-miroservices/api/proto/user_service";
+option go_package = ".;pb_user_internal";
 
 service UserServiceInternal {
-  rpc GetPosUserByEmail(EmailReq) returns (User) {}
-  rpc GetBackofficeUserByEmail(EmailReq) returns (User) {}
-  rpc CreateCustomer(CreateCustomerReq) returns (Id) {}
+  rpc GetPosUser(Id) returns (PosUser) {}
+  rpc GetPosUserByEmail(EmailReq) returns (PosUser) {}
+  rpc GetBackofficeUser(Id) returns (BackofficeUser) {}
+  rpc GetBackofficeUserByEmail(EmailReq) returns (BackofficeUser) {}
+  rpc GetCustomer(PhoneReq) returns (Customer) {}
+  rpc UpsertCustomer(UpsertCustomerReq) returns (Id) {}
 }
 
 message EmailReq {
@@ -15,16 +18,40 @@ message EmailReq {
 }
 
 message Id {
-  uint64 id = 1;
+  string id = 1;
 }
 
-message User {
-  uint64 id = 1;
+message PhoneReq {
+  string phone = 1;
+}
+
+message PosUser {
+  string id = 1;
+  string restaurant_id = 2;
+  string name = 3;
+  string email = 4;
+  string password = 5;
+  string first_password = 6;
+}
+
+message BackofficeUser {
+  string id = 1;
+  string restaurant_id = 2;
+  string name = 3;
+  string email = 4;
+  string password = 5;
+  string first_password = 6;
+}
+
+message Customer {
+  string id = 1;
+  string phone_number = 2;
+  string name = 3;
+  string image = 4;
+}
+
+message UpsertCustomerReq {
+  string phone_number = 1;
   string name = 2;
-  string email = 3;
-  string password = 4;
-}
-
-message CreateCustomerReq {
-  
+  string image = 3;
 }

@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS "users_backoffice" (
     "email" VARCHAR(255) NOT NULL,
     "password" TEXT NOT NULL,
     "first_password" TEXT NOT NULL,
-    "last_login_at" TIMESTAMPTZ,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     "updated_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE("email")

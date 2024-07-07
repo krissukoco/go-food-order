@@ -11,7 +11,7 @@ CREATE TYPE order_payment_status AS ENUM (
 );
 
 CREATE TYPE order_fulfillment_status AS ENUM (
-    'ORDERED', 'CONFIRMED', 'PREPARING', 'PREPARED', 'SERVED'
+    'ORDERED', 'CANCELLED', 'CONFIRMED', 'PREPARING', 'PREPARED', 'SERVED'
 );
 
 CREATE TYPE order_platform AS ENUM (

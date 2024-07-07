@@ -1,4 +1,4 @@
-package middleware
+package transport
 
 import (
 	"errors"
@@ -9,20 +9,12 @@ import (
 	"github.com/krissukoco/go-food-order-microservices/internal/auth"
 )
 
-type contextKey struct {
-	key string
-}
-
-var (
-	authKey = &contextKey{"auth"}
-)
-
 var (
 	ErrUnauthorized = errors.New("unauthorized")
 	ErrForbidden    = errors.New("forbidden")
 )
 
-func NewAuth(jwtSecret string) fiber.Handler {
+func NewAuthMiddleware(hdl auth.JWTAuthHandler) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		h := c.Get("authorization")
 		if h == "" {
@@ -38,7 +30,7 @@ func NewAuth(jwtSecret string) fiber.Handler {
 			return ErrUnauthorized
 		}
 
-		u, err := auth.ParseToken(split[1], jwtSecret)
+		u, err := hdl.Parse(c.Context(), split[1])
 		if err != nil {
 			if errors.Is(err, auth.ErrInvalidToken) || errors.Is(err, auth.ErrTokenExpired) {
 				return fmt.Errorf("%w: %v", ErrUnauthorized, err)
@@ -46,9 +38,14 @@ func NewAuth(jwtSecret string) fiber.Handler {
 			return err
 		}
 
-		// set auth to locals
-		c.Locals(authKey, u)
+		// set auth user to context
+		ctx := auth.NewContext(c.Context(), u)
+		c.SetUserContext(ctx)
 
 		return c.Next()
 	}
+}
+
+func HTTPAuthContext(c *fiber.Ctx) (*auth.User, error) {
+	return auth.FromContext(c.UserContext())
 }

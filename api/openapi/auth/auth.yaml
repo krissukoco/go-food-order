@@ -1,0 +1,84 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Auth API
+paths:
+  /login/pos:
+    post:
+      name: LoginPos
+      operationId: LoginPos
+      summary: Login to gain tokens for POS users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Tokens Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '400':
+          description: Invalid Credentials
+          schema:
+            $ref: '../common/common.yaml#/components/schemas/ErrorResponse'
+          examples:
+            application/json:
+              code: 10000
+              message: 'Invalid Credentials'
+              details: []
+  /login/backoffice:
+    post:
+      name: LoginBackoffice
+      operationId: LoginBackoffice
+      summary: Login to gain tokens for Backoffice users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: tokens response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          example: example@mail.com
+          x-oapi-codegen-extra-tags:
+            validate: "required,email"
+        password:
+          type: string
+          example: xxxxxxxxxxxxxx
+          x-oapi-codegen-extra-tags:
+            validate: "required"
+    AuthTokens:
+      type: object
+      required:
+        - refresh_token
+        - access_token
+      properties:
+        refresh_token:
+          type: string
+          example: 00000-0000000000-0000-0000
+        access_token:
+          type: string
+          example: eyjXXXXXXXX.YYYYYYY.ZZZZZZ
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

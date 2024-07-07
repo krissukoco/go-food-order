@@ -1,0 +1,35 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Common Types
+components:
+  schemas:
+    ErrorDetail:
+      type: object
+      required:
+        - field
+        - error
+      properties:
+        field:
+          type: string
+          example: "password"
+        error:
+          type: string
+          example: "Password is required"
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+        - details
+      properties:
+        code:
+          type: integer
+          example: 10000
+        message:
+          type: string
+          example: "Invalid Request"
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'

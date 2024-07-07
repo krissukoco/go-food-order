@@ -1,9 +1,8 @@
 package auth
 
 import (
-	"encoding/json"
+	"context"
 	"errors"
-	"fmt"
 
 	"github.com/gofrs/uuid"
 	"github.com/golang-jwt/jwt/v5"
@@ -17,9 +16,6 @@ var (
 
 type Group string
 
-var _ json.Marshaler = (*Group)(nil)   // transform to JSON
-var _ json.Unmarshaler = (*Group)(nil) // helps with validating user group
-
 func (x Group) String() string {
 	return string(x)
 }
@@ -30,23 +26,6 @@ func (x Group) IsValid() bool {
 		return true
 	}
 	return false
-}
-
-func (x Group) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%s"`, x.String())), nil
-}
-
-func (x *Group) UnmarshalJSON(v []byte) error {
-	var s string
-	if err := json.Unmarshal(v, &s); err != nil {
-		return err
-	}
-	g := Group(s)
-	if !g.IsValid() {
-		return fmt.Errorf("invalid user group '%s'", s)
-	}
-	*x = g
-	return nil
 }
 
 const (
@@ -67,24 +46,11 @@ type JWTPayload struct {
 	RestaurantId uuid.UUID `json:"rid,omitempty"`
 }
 
-func (j JWTPayload) User() (*User, error) {
-	userId, err := uuid.FromString(j.Subject)
-	if err != nil {
-		return nil, ErrInvalidToken
-	}
-	return &User{Id: uuid.UUID(userId), Group: j.Group, RestaurantId: j.RestaurantId}, nil
-}
-
-func ParseToken(token string, secret string) (*User, error) {
-	var p JWTPayload
-	t, err := jwt.ParseWithClaims(token, &p, func(t *jwt.Token) (interface{}, error) {
-		return secret, nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if !t.Valid {
-		return nil, err
-	}
-	return p.User()
+type JWTAuthHandler interface {
+	// Parse parses and validates access token and returns user
+	Parse(ctx context.Context, accessToken string) (*User, error)
+	// GenerateTokens generate access and refresh tokens from user
+	GenerateTokens(ctx context.Context, user User) (access string, refresh string, err error)
+	// Refresh validates refresh token and returns new access and refresh tokens
+	Refresh(ctx context.Context, refreshToken string) (access string, refresh string, err error)
 }

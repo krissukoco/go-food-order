@@ -4,3 +4,7 @@
 .env.test
 .env.staging
 .env.production
+
+# Generated codes
+*.oapi.go
+*.pb.go
