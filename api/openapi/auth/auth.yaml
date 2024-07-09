@@ -48,8 +48,73 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthTokens'
+  /login/customer:
+    post:
+      name: LoginCustomer
+      operationId: LoginCustomer
+      summary: Login as customer by providing phone number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhoneNumberRequest'
+      responses:
+        '200':
+          description: OTP request ID and expiration time
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestOtpResponse'
+        '400':
+          description: Invalid phone number
+          schema:
+            $ref: '../common/common.yaml#/components/schemas/ErrorResponse'
+          examples:
+            application/json:
+              code: 10000
+              message: 'Invalid phone number'
+              details: []
+  /login/customer/verify-otp/{id}:
+    post:
+      name: CustomerVerifyOtp
+      operationId: CustomerVerifyOtp
+      summary: Verify OTP that was sent to phone
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            x-go-type: uuid.UUID
+            x-go-type-import:
+              path: github.com/gofrs/uuid
+              name: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - otp
+              properties:
+                otp: 
+                  type: string
+                  example: '123456'
+                  x-oapi-codegen-extra-tags:
+                    validate: "required,min=6,max=6"
+      response:
+        '200':
+          description: tokens response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+                
 components:
   schemas:
+    # REQUESTS
     LoginRequest:
       type: object
       required:
@@ -66,6 +131,18 @@ components:
           example: xxxxxxxxxxxxxx
           x-oapi-codegen-extra-tags:
             validate: "required"
+    PhoneNumberRequest:
+      type: object
+      required:
+        - phone_number
+      properties:
+        phone_number:
+          type: string
+          example: '+6280012345678'
+          x-oapi-codegen-extra-tags:
+            validate: "required"
+
+    # RESPONSES
     AuthTokens:
       type: object
       required:
@@ -74,11 +151,27 @@ components:
       properties:
         refresh_token:
           type: string
-          example: 00000-0000000000-0000-0000
+          example: 01908ba7-a414-7724-9b2d-65f126c2f2d2
         access_token:
           type: string
           example: eyjXXXXXXXX.YYYYYYY.ZZZZZZ
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
+    RequestOtpResponse:
+      type: object
+      required:
+        - id
+        - expired_at
+      properties:
+        id: 
+          type: string
+          example: 01908ba7-a414-7724-9b2d-65f126c2f2d2
+        expired_at:
+          type: string
+          example: '2006-01-02T15:04:05Z'
+    Message:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Send
